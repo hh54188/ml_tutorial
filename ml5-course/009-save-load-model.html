@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+</head>
+
+<body>
+
+    <script>
+        let mobilenet;
+        let classifier;
+        let video;
+        let ukeButton;
+        let whistleButton;
+        let trainButton;
+        let saveButton;
+
+        function modelReady() {
+            console.log('Model is ready')
+            classifier.load('model.json', customModelReady)
+        }
+
+        function customModelReady() {
+            console.log('Custom model is ready')
+            classifier.classify(gotResults);
+        }
+
+        function videoReady() {
+            console.log('Video is ready')
+        }
+
+        function gotResults(err, results) {
+            if (err) {
+                console.error(err)
+            }
+            console.log(results)
+            classifier.classify(gotResults)
+        }
+
+        function setup() {
+            createCanvas(640, 480);
+            video = createCapture(VIDEO)
+            video.hide()
+            background(0)
+
+            mobilenet = ml5.featureExtractor('MobileNet', modelReady);
+            classifier = mobilenet.classification(video, videoReady);
+
+            ukeButton = createButton('ukulele')
+            ukeButton.mousePressed(() => {
+                classifier.addImage('ukulele')
+            })
+
+            whistleButton = createButton('whistle')
+            whistleButton.mousePressed(() => {
+                classifier.addImage('whistle')
+            })
+
+            trainButton = createButton('train')
+            trainButton.mousePressed(() => {
+                classifier.train(function whileTraining(loss) {
+                    if (loss == null) {
+                        console.log('Training Complete');
+                        classifier.classify(gotResults);
+                    } else {
+                        console.log(loss)
+                    }
+                });
+            })
+            
+            saveButton = createButton('save')
+            whistleButton.mousePressed(() => {
+                classifier.save();
+            })
+        }
+
+        function draw() {
+            background(255);
+            image(video, 0, 0);
+        }
+    </script>
+</body>
+
+</html>

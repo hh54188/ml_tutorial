@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+</head>
+
+<body>
+
+    <script>
+        function sign(n) {
+            if (n >= 0) {
+                return 1;
+            }
+            return -1;
+        }
+        class Perceptron {
+            constructor() {
+                this.weights = [null, null];
+                this.lr = 0.1 // lr = Learning Rates
+                for (let i = 0; i < this.weights.length; i++) {
+                    this.weights[i] = Math.random()
+                }
+            }
+            guess(inputs) {
+                let sum = 0;
+                for (let i = 0; i < this.weights.length; i++) {
+                    sum += this.weights[i] * inputs[i]
+                }
+                return sign(sum)
+            }
+            train(inputs, target) {
+                const guess = this.guess(inputs);
+                const error = target - guess;
+
+                for (let i = 0; i < this.weights.length; i++) {
+                    this.weights[i] += error * inputs[i] * this.lr
+                }
+            }
+        }
+
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+        const width = 400;
+        const height = 400
+
+        class Point {
+            constructor() {
+                this.x = random(0, width);
+                this.y = random(0, height);
+
+                if (this.x > this.y) {
+                    this.label = 1;
+                } else {
+                    this.label = -1;
+                }
+            }
+            show() {
+                stroke(0);
+                if (this.label == 1) {
+                    fill(255);
+                } else {
+                    fill(0)
+                }
+                ellipse(this.x, this.y, 8, 8)
+            }
+        }
+        const arr = []
+        const p = new Perceptron()
+        function setup() {
+            createCanvas(width, height);
+            for (let i = 0; i < 100; i++) {
+                arr.push(new Point())
+            }
+        }
+
+        function draw() {
+            background(255);
+            stroke(0);
+            line(0, 0, width, height);
+            arr.forEach(point => {
+                point.show();
+            })
+
+            arr.forEach(point => {
+                const inputs = [point.x, point.y];
+                const guess = p.guess(inputs);
+                if (guess == point.label) {
+                    fill(0, 255, 0);
+                } else {
+                    fill(255, 0, 0);
+                }
+                noStroke();
+                ellipse(point.x, point.y, 4, 4)
+            })
+        }
+
+        function mousePressed() {
+            arr.forEach(point => {
+                const inputs = [point.x, point.y];
+                p.train(inputs, point.label)
+            })
+        }
+    </script>
+</body>
+
+</html>

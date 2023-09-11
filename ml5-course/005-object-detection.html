@@ -1,0 +1,41 @@
+<html>
+    
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+</head>
+    <body>
+        <script>
+            let img;
+            function preload() {
+                img = loadImage('dog.jpg');
+                detector = ml5.objectDetector('cocossd')
+            }
+
+            function setup() {
+                createCanvas(640, 480);
+                image(img, 0, 0)
+                detector.detect(img, gotDetections)
+            }
+
+            function gotDetections(error, results) {
+                if (error) {
+                    return console.log(error)
+                }
+                results.forEach((item) => {
+                    let object = item;
+                    stroke(0, 255, 0);
+                    strokeWeight(4);
+                    noFill();
+                    rect(object.x, object.y, object.width, object.height)
+
+                    noStroke();
+                    fill(255);
+                    textSize(24);
+                    text(object.label, object.x + 10, object.y + 24)
+                })
+                console.log(results)
+            }
+        </script>
+    </body>
+</html>

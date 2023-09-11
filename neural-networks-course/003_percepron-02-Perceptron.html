@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+</head>
+
+<body>
+
+    <script>
+        let trainingIndex = 0;
+        function f(x) {
+            // return 0.3 * x + 0.2
+            return 0.89 * x - 0.1
+        }
+        function sign(n) {
+            if (n >= 0) {
+                return 1;
+            }
+            return -1;
+        }
+        class Perceptron {
+            constructor() {
+                this.weights = [null, null, null];
+                this.lr = 0.1 // lr = Learning Rates
+                for (let i = 0; i < this.weights.length; i++) {
+                    this.weights[i] = Math.random()
+                }
+            }
+            guess(inputs) {
+                let sum = 0;
+                for (let i = 0; i < this.weights.length; i++) {
+                    sum += this.weights[i] * inputs[i]
+                }
+                return sign(sum)
+            }
+            guessY (x) {
+                // const m = this.weights[1] / this.weights[0];
+                // const b = this.weights[2];
+                // return m * this.x + b
+
+                const w0 = this.weights[0];
+                const w1 = this.weights[1];
+                const w2 = this.weights[2];
+                return   - (w2 / w1) - (w0 / w1) * x;
+            }
+            train(inputs, target) {
+                const guess = this.guess(inputs);
+                const error = target - guess;
+
+                for (let i = 0; i < this.weights.length; i++) {
+                    this.weights[i] += error * inputs[i] * this.lr
+                }
+            }
+        }
+
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+        function randomRange(min, max) {
+            let cal = (Math.random() * (max - min) + min);
+            return parseFloat(cal);
+        }
+        const width = 400;
+        const height = 400
+
+        class Point {
+            constructor(x_, y_) {
+                this.x = x_ || random(-1, 1);
+                this.y = y_ || random(-1, 1);
+                this.bias = 1;
+
+                const lineY = f(this.x);
+
+                if (this.y > lineY) {
+                    this.label = 1;
+                } else {
+                    this.label = -1;
+                }
+            }
+            pixelX() {
+                return map(this.x, -1, 1, 0, width)
+            }
+            pixelY() {
+                return map(this.y, -1, 1, height, 0)
+            }
+            show() {
+                stroke(0);
+                if (this.label == 1) {
+                    fill(255);
+                } else {
+                    fill(0)
+                }
+                const px = this.pixelX()
+                const py = this.pixelY()
+                ellipse(px, py, 8, 8)
+            }
+        }
+        const arr = []
+        const p = new Perceptron()
+        function setup() {
+            createCanvas(width, height);
+            for (let i = 0; i < 100; i++) {
+                arr.push(new Point())
+            }
+        }
+
+        function draw() {
+            background(255);
+            stroke(0);
+
+
+            // const x1 = -1;
+            // const y1 = f(x1);
+            // const x2 = 1;
+            // const y2 = f(x2)
+            // line(x1, y1, x2, y2)
+
+            const p1 = new Point(-1, f(-1));
+            const p2 = new Point(1, f(1));
+            line(p1.pixelX(), p1.pixelY(), p2.pixelX(), p2.pixelY())
+
+            // line(0, height, width, 0);
+            const p3 = new Point(-1, p.guessY(-1))
+            const p4 = new Point(1, p.guessY(1))
+            line(p3.pixelX(), p3.pixelY(), p4.pixelX(), p4.pixelY())
+
+            arr.forEach(point => {
+                point.show();
+            })
+            arr.forEach(point => {
+                const inputs = [point.x, point.y, point.bias];
+                const guess = p.guess(inputs);
+                if (guess == point.label) {
+                    fill(0, 255, 0);
+                } else {
+                    fill(255, 0, 0);
+                }
+                noStroke();
+                ellipse(point.pixelX(), point.pixelY(), 4, 4)
+            })
+
+            const training = arr[trainingIndex];
+            const inputs = [training.x, training.y, training.bias];
+            const target = training.label;
+            p.train(inputs, target)
+            trainingIndex++;
+            if (trainingIndex == arr.length) {
+                trainingIndex = 0;
+            }
+        }
+
+        function mousePressed() {
+            arr.forEach(point => {
+                // const inputs = [point.x, point.y, point.bias];
+                // p.train(inputs, point.label)
+            })
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+    <style>
+        body,
+        html {
+            background-color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        let soundClassifier;
+        function preload() {
+            let options = { probabilityThreshold: 0.95 }
+            soundClassifier = ml5.soundClassifier('SpeechCommands18w', options)
+        }
+        function setup() {
+            createCanvas(400, 400)
+            soundClassifier.classify(gotResults)
+        }
+
+        function gotResults(error, results) {
+            if (error) {
+                console.log('something went wrong')
+                console.error(error)
+                return;
+            }
+            console.log(results[0].label)
+        }
+
+    </script>
+</body>
+
+</html>

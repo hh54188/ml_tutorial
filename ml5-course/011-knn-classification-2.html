@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+    <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+</head>
+
+<body>
+    <script>
+        let features;
+        let video;
+        let knn;
+
+
+        function setup() {
+            createCanvas(320, 240);
+            video = createCapture(VIDEO);
+            video.size(320, 240)
+            video.hide();
+            features = ml5.featureExtractor('MobileNet', modelReady)
+            knn = ml5.KNNClassifier();
+        }
+
+        function gotResults(error, result) {
+            if (error) {
+                return;
+            }
+            console.log(result)
+        }
+
+        function mousePressed() {
+            if (knn.getNumberLabels() > 0) {
+                const logits = features.infer(video)
+                knn.classify(logits, gotResults)
+            }
+        }
+
+        function keyPressed() {
+            const logits = features.infer(video)
+            if (key == "l") {
+                knn.addExample(logits, "left")
+            } else if (key == "r") {
+                knn.addExample(logits, "right")
+            }
+            console.log(logits.print());
+        }
+
+        function modelReady() {
+            console.log('model ready')
+        }
+
+        function draw() {
+            image(video, 0, 0)
+        }
+    </script>
+</body>
+
+</html>

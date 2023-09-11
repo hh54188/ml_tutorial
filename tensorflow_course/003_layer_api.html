@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"> </script>
+    <!-- <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script> -->
+</head>
+
+<body>
+    <script>
+        // This is the model
+        const model = tf.sequential();
+
+        // Create the hidden layer
+        const hidden = tf.layers.dense({
+            units: 4,
+            inputShape: [2],
+            activation: 'sigmoid'
+        })
+        // Add the layer
+        model.add(hidden);
+
+        // Create another layer
+        const output = tf.layers.dense({
+            units: 1,
+            // here the input shape is "inferred from the previous layer"
+            activatoin: 'sigmoid'
+        })
+        model.add(output)
+
+        // An optimizer using gradient descent
+        const sgdOpt = tf.train.sgd(0.1);
+
+        // I'm done configuring the model so compile it 
+        model.compile({
+            optimizer: sgdOpt,
+            loss: tf.losses.meanSquaredError
+        })
+        const xs = tf.tensor2d([
+            [0, 0],
+            [0.5, 0.5],
+            [1, 1]
+        ])
+        const ys = tf.tensor2d([
+            [1],
+            [0.5],
+            [0],
+        ])
+
+        async function train() {
+            for (let i = 0; i < 1000; i++) {
+                const config = {
+                    shuffle: true,
+                    epochs: 10
+                }
+                const response = await model.fit(xs, ys, config);
+                console.log(response.history.loss[0])
+            }
+        }
+
+        train().then(() => {
+            console.log('training complete')
+            let outputs = model.predict(xs)
+            outputs.print();
+        })
+
+
+        // const xs = tf.tensor2d([
+        //     [0.25, 0.92],
+        //     [0.25, 0.92],
+        //     [0.25, 0.92]
+        // ])
+
+    </script>
+</body>
+
+</html>
